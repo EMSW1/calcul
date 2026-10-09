@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculateur RH — STC</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#263248;--muted:#718096;--blue:#465bd8;--line:#e3e8f1;--green:#12836b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{background:#fff;border-bottom:1px solid var(--line)}.top,main{max-width:900px;margin:auto;padding:18px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}h1{font-size:20px;margin:0}h2{font-size:17px;margin:0 0 4px}.sub,.hint{color:var(--muted);font-size:12px}
+main{padding-top:22px;padding-bottom:35px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.head{display:flex;align-items:center;gap:10px;margin-bottom:16px}.num{background:#eef0ff;color:var(--blue);border-radius:9px;padding:7px 10px;font-weight:800}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.field label{display:block;font-size:12px;font-weight:650;color:#526078;margin-bottom:5px}
+input,select{width:100%;height:41px;padding:8px 10px;border:1px solid #dce3ed;border-radius:8px;background:#fff;color:var(--ink);font:inherit}
+.results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:17px}.metric{padding:13px;border:1px solid var(--line);border-radius:10px;min-width:0}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:20px;margin-top:5px;overflow-wrap:anywhere}.primary{background:#f0f2ff}.primary strong{color:var(--blue)}
+table{border-collapse:collapse;width:100%;margin-top:10px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}th{font-size:11px;color:var(--muted);font-weight:700}td:last-child,th:last-child{text-align:right}.money{font-weight:700;white-space:nowrap}
+.final{background:#f0faf6;border-color:#d3eee4}.final strong{color:var(--green)}.actions{display:flex;gap:8px}button{border:0;border-radius:8px;padding:10px 13px;font:inherit;font-weight:700;cursor:pointer}.blue{background:var(--blue);color:white}.light{background:white;border:1px solid var(--line)}
+.note{font-size:12px;color:var(--muted);margin-top:12px}
+@media(max-width:560px){.fields,.results{grid-template-columns:1fr}.card{padding:14px}.top,main{padding-left:13px;padding-right:13px}table{font-size:12px}th,td{padding:8px 5px}}
+@media print{body{background:white}.top .actions{display:none}main{padding:8px}.card{break-inside:avoid;box-shadow:none}.actions{display:none}}
+</style>
+</head>
+<body>
+<header><div class="top"><div><h1>Calculateur RH</h1><div class="sub">Simulation des indemnités et du STC · MAD</div></div><div class="actions"><button class="light" type="button" onclick="resetAll()">Réinitialiser</button><button class="blue" type="button" onclick="window.print()">Imprimer / PDF</button></div></div></header>
+<main>
+<section class="card">
+ <div class="head"><div class="num">1</div><div><h2>Informations et calculs</h2><div class="sub">Remplissez les champs — les montants se calculent automatiquement.</div></div></div>
+ <div class="fields">
+  <div class="field"><label for="base">Salaire de base mensuel (MAD)</label><input id="base" type="number" min="0" step=".01" value="4000"></div>
+  <div class="field"><label for="brut">Salaire brut mensuel (MAD)</label><input id="brut" type="number" min="0" step=".01" value="4500"></div>
+  <div class="field"><label for="poste">Poste</label><select id="poste"><option value="MAILER">MAILER</option><option value="TL">TL</option><option value="MANAGER">MANAGER</option></select></div>
+  <div class="field"><label for="debut">Date de début</label><input id="debut" type="date" value="2018-02-01"></div>
+  <div class="field"><label for="depart">Date de départ</label><input id="depart" type="date" value="2026-09-30"></div>
+  <div class="field"><label for="conge">Congé non payé (jours)</label><input id="conge" type="number" min="0" step=".5" value="0"></div>
+  <div class="field"><label for="recup">Récupération / rémunération non payée (jours)</label><input id="recup" type="number" min="0" step=".5" value="0"></div>
+  <div class="field"><label for="jours">Jours non payés</label><input id="jours" type="number" min="0" step=".5" value="0"></div>
+ </div>
+ <div class="results">
+  <div class="metric"><span>Ancienneté calculée</span><strong id="anciennete">—</strong></div>
+  <div class="metric"><span>Préavis appliqué</span><strong id="preavis">—</strong></div>
+  <div class="metric primary"><span>Total indemnités — salaire de base (hors STC)</span><strong id="totalBase">—</strong></div>
+  <div class="metric primary"><span>Total indemnités — salaire brut (hors STC)</span><strong id="totalBrut">—</strong></div>
+ </div>
+ <h2 style="margin-top:20px">Pourcentages des indemnités (hors STC)</h2>
+ <table><thead><tr><th>Pourcentage</th><th>Total sur salaire de base</th><th>Total sur salaire brut</th></tr></thead><tbody id="percentages"></tbody></table>
+ <div class="note">Simulation basée sur les règles déjà présentes dans votre fichier : préavis selon le poste, dommages-intérêts de 1,5 mois par année d'ancienneté et barème 96 / 144 / 196. Vérifiez ces règles avant toute utilisation officielle.</div>
+</section>
+
+<section class="card">
+ <div class="head"><div class="num">2</div><div><h2>STC — Solde de tout compte</h2><div class="sub">Montant affiché séparément pour chaque salaire, selon les jours renseignés.</div></div></div>
+ <div class="results">
+  <div class="metric primary"><span>STC total — salaire de base</span><strong id="stcBase">—</strong></div>
+  <div class="metric primary"><span>STC total — salaire brut</span><strong id="stcBrut">—</strong></div>
+ </div>
+ <div class="note">Formule conservée du fichier initial : salaire mensuel ÷ 26 × (congé non payé + récupération / rémunération non payée + jours non payés).</div>
+</section>
+
+
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const val=id=>Math.max(0,Number($(id).value)||0);
+const money=n=>(Number.isFinite(n)?n:0).toLocaleString('fr-MA',{minimumFractionDigits:2,maximumFractionDigits:2})+' MAD';
+const put=(id,v)=>$(id).textContent=v;
+function seniority(start,end){
+ if(!start||!end)return null;
+ const s=new Date(start+'T12:00:00'),e=new Date(end+'T12:00:00');
+ if(Number.isNaN(+s)||Number.isNaN(+e)||e<s)return null;
+ let y=e.getFullYear()-s.getFullYear(),m=e.getMonth()-s.getMonth(),d=e.getDate()-s.getDate();
+ if(d<0){m--;d+=new Date(e.getFullYear(),e.getMonth(),0).getDate();}
+ if(m<0){y--;m+=12;}
+ return {y,m,d,decimal:y+m/12+d/365.25};
+}
+function preavis(poste,years){if(poste==='MAILER')return years<5?1:2;if(poste==='TL'||poste==='MANAGER')return 3;return 0;}
+function indemnityYears(y){return 96*Math.min(y,5)+144*Math.min(Math.max(y-5,0),5)+196*Math.max(y-10,0);}
+function clearResults(){
+ ['anciennete','preavis','totalBase','totalBrut','stcBase','stcBrut'].forEach(id=>put(id,'Vérifiez les dates'));
+ $('percentages').innerHTML='';
+}
+function calculate(){
+ const s=seniority($('debut').value,$('depart').value);
+ if(!s){clearResults();return;}
+ const b=val('base'),g=val('brut'),p=preavis($('poste').value,s.decimal);
+ put('anciennete',`${s.y} an(s), ${s.m} mois`);
+ put('preavis',`${p} mois`);
+ const domB=1.5*s.decimal*b,domG=1.5*s.decimal*g;
+ const licFactor=indemnityYears(s.decimal);
+ const licB=licFactor*(b/191),licG=licFactor*(g/191);
+ const totalB=p*b+domB+licB,totalG=p*g+domG+licG;
+ const days=val('conge')+val('recup')+val('jours');
+ const stcB=b/26*days,stcG=g/26*days;
+ put('totalBase',money(totalB));put('totalBrut',money(totalG));
+ put('stcBase',money(stcB));put('stcBrut',money(stcG));
+ $('percentages').innerHTML=[70,60,50,40].map(pct=>`<tr><td>${pct}%</td><td class="money">${money(totalB*pct/100)}</td><td class="money">${money(totalG*pct/100)}</td></tr>`).join('');
+}
+function resetAll(){
+ // Remettre les champs à zéro et effacer les dates.
+ $('base').value='0';
+ $('brut').value='0';
+ $('poste').selectedIndex=0;
+ $('debut').value='';
+ $('depart').value='';
+ $('conge').value='0';
+ $('recup').value='0';
+ $('jours').value='0';
+
+ // Forcer tous les résultats et pourcentages à zéro.
+ put('anciennete','0 an(s), 0 mois');
+ put('preavis','0 mois');
+ put('totalBase',money(0));
+ put('totalBrut',money(0));
+ put('stcBase',money(0));
+ put('stcBrut',money(0));
+ $('percentages').innerHTML=[70,60,50,40].map(pct=>`<tr><td>${pct}%</td><td class="money">${money(0)}</td><td class="money">${money(0)}</td></tr>`).join('');
+}
+['base','brut','poste','debut','depart','conge','recup','jours'].forEach(id=>$(id).addEventListener('input',calculate));
+calculate();
+</script>
+</body>
+</html>
