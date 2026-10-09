@@ -4,62 +4,495 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulation des indemnités</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--ink:#202b3c;--muted:#65748b;--blue:#4056d6;--blue-soft:#eef0ff;--line:#dfe5ef;--green:#087f5b;--red:#b42318;--shadow:0 8px 24px rgba(31,45,75,.06)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}header{background:#fff;border-bottom:1px solid var(--line)}.top,main{max-width:1000px;margin:0 auto;padding:20px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}h1{font-size:clamp(21px,3vw,28px);margin:0}h2{font-size:18px;margin:0}.sub{font-size:12px;color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap}button{border:0;border-radius:9px;padding:11px 15px;font:inherit;font-weight:700;cursor:pointer}button:hover{filter:brightness(.97)}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #aab5ff;outline-offset:2px}.blue{background:var(--blue);color:#fff}.light{background:#fff;border:1px solid var(--line);color:var(--ink)}main{padding-top:24px;padding-bottom:40px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:var(--shadow)}.head{display:flex;align-items:center;gap:12px;margin-bottom:18px}.num{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:11px;background:var(--blue-soft);color:var(--blue);font-weight:800}.fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px 10px}.field{min-width:0}
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-soft: #eef2ff;
+  --line: #e2e8f0;
+  --green: #059669;
+  --green-soft: #ecfdf5;
+  --red: #dc2626;
+  --shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), 0 0 1px 1px rgba(15, 23, 42, 0.04);
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+header {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.top, main {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+h1 {
+  font-size: clamp(22px, 3vw, 26px);
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+h2 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+  color: #1e293b;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 18px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.25);
+  outline-offset: 2px;
+}
+
+.blue {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+.blue:hover {
+  background: var(--primary-hover);
+}
+
+.light {
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.light:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+main {
+  padding-top: 28px;
+  padding-bottom: 48px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s ease;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.num {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.field {
+  min-width: 0;
+}
+
 /* Regrouper visuellement les dates et les deux types de jours non payés. */
-.fields .field:nth-child(1){grid-column:1;grid-row:1}
-.fields .field:nth-child(2){grid-column:2;grid-row:1}
-.fields .field:nth-child(3){grid-column:3;grid-row:1}
-.fields .field:nth-child(4){grid-column:3;grid-row:2}
-.fields .field:nth-child(5){grid-column:1;grid-row:2}
-.fields .field:nth-child(6){grid-column:2;grid-row:2}
-.fields .field:nth-child(7){grid-column:4;grid-row:2}.field label{display:block;font-size:12px;font-weight:700;color:#4a5870;margin-bottom:4px;line-height:1.25;min-height:30px}input,select{display:block;width:100%;min-width:0;min-height:38px;padding:7px 9px;border:1px solid #d5ddea;border-radius:9px;background:#fff;color:var(--ink);font:inherit}.results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}.indemnity-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}.indemnity-row .metric{padding:13px 14px}.indemnity-row .metric strong{font-size:clamp(16px,2vw,21px)}.metric{padding:15px;border:1px solid var(--line);border-radius:12px;min-width:0;background:#fff}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:clamp(18px,2.5vw,23px);margin-top:6px;overflow-wrap:anywhere}.primary{background:#f3f4ff;border-color:#dfe2ff}.primary strong{color:var(--blue)}.final{background:#effaf5;border-color:#cdeee0}.final strong{color:var(--green)}.side-by-side{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:stretch}.side-by-side .card{min-width:0;margin:0}.side-by-side .section-title{margin:0 0 8px;font-size:16px}.side-by-side table{min-width:0;font-size:12px}.side-by-side th,.side-by-side td{padding:8px 5px}.section-title{margin:24px 0 8px;font-size:16px}.table-wrap{width:100%;overflow-x:auto}table{border-collapse:collapse;width:100%;margin-top:8px;min-width:490px}th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line)}th{font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:800}td:last-child,th:last-child{text-align:right}.money{font-weight:700;white-space:nowrap}.note{font-size:12px;color:var(--muted);margin-top:13px}.status{display:none;margin-top:14px;padding:11px 13px;border-radius:9px;font-size:13px}.status.error{display:block;background:#fff1f0;color:var(--red);border:1px solid #ffd5d2}@media(max-width:850px){.fields{grid-template-columns:repeat(2,minmax(0,1fr))}.fields .field:nth-child(1){grid-column:1;grid-row:1}.fields .field:nth-child(2){grid-column:2;grid-row:1}.fields .field:nth-child(3){grid-column:1;grid-row:2}.fields .field:nth-child(5){grid-column:1;grid-row:3}.fields .field:nth-child(6){grid-column:2;grid-row:3}.fields .field:nth-child(4){grid-column:1;grid-row:4}.fields .field:nth-child(7){grid-column:2;grid-row:4}.results{grid-template-columns:repeat(2,minmax(0,1fr))}.side-by-side{grid-template-columns:1fr}}@media(max-width:480px){.top,main{padding-left:13px;padding-right:13px}.fields,.results{grid-template-columns:repeat(2,minmax(0,1fr))}.field label{font-size:11px;min-height:34px}.fields{gap:8px}.indemnity-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.indemnity-row .metric{padding:10px}.indemnity-row .metric span{font-size:11px}.indemnity-row .metric strong{font-size:15px}.card{padding:15px}.actions{width:100%}.actions button{flex:1}.metric strong{font-size:19px}}@page{size:A4 portrait;margin:7mm}
-@media print{
-  html,body{width:100%;height:auto;background:#fff!important;color:#111;font-size:9px;line-height:1.2;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .top .actions{display:none!important}
-  header{border-bottom:1px solid #bbb}
-  .top,main{width:100%;max-width:none;margin:0;padding:0}
-  .top{padding:0 0 5px;gap:5px}
-  h1{font-size:16px;line-height:1.1}
-  h2{font-size:11px;line-height:1.15}
-  .sub{font-size:8px;line-height:1.15}
-  .card{box-shadow:none;border:1px solid #bbb;border-radius:5px;break-inside:avoid;page-break-inside:avoid;padding:7px;margin:5px 0}
-  .head{gap:6px;margin-bottom:6px}
-  .num{flex-basis:22px;height:22px;border-radius:4px;padding:0;font-size:10px}
-  .fields{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 6px}
-  .fields .field:nth-child(1){grid-column:1;grid-row:1}.fields .field:nth-child(2){grid-column:2;grid-row:1}.fields .field:nth-child(3){grid-column:3;grid-row:1}
-  .fields .field:nth-child(5){grid-column:1;grid-row:2}.fields .field:nth-child(6){grid-column:2;grid-row:2}.fields .field:nth-child(4){grid-column:3;grid-row:2}.fields .field:nth-child(7){grid-column:4;grid-row:2}
-  .field label{font-size:7.5px;margin-bottom:2px;line-height:1.1;min-height:18px}
-  input,select{min-width:0;min-height:21px;height:21px;padding:2px 4px;border-radius:4px;font-size:8px}
-  .results{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:6px}
-  .indemnity-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:5px}
-  .metric,.indemnity-row .metric{padding:5px 7px;border-radius:5px}
-  .metric span{font-size:7.5px;line-height:1.15}
-  .metric strong,.indemnity-row .metric strong{font-size:11px;line-height:1.15;margin-top:3px;overflow-wrap:anywhere}
-  .side-by-side{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;align-items:start}
-  .side-by-side .card{padding:6px;margin:0}
-  .side-by-side .section-title{font-size:9px;margin:0 0 3px}
-  .side-by-side .table-wrap{overflow:visible}
-  .side-by-side table{width:100%;min-width:0;margin-top:3px;font-size:7px;table-layout:fixed}
-  .side-by-side th,.side-by-side td{padding:3px 2px;overflow-wrap:anywhere}
-  .section-title{font-size:10px;margin:7px 0 3px}
-  .table-wrap{overflow:visible}
-  table{width:100%;min-width:0;margin-top:3px;font-size:8px}
-  th,td{padding:3px 5px;border-bottom:1px solid #ddd}
-  th{font-size:7px}
-  .money{white-space:nowrap}
-  .note{font-size:7px;line-height:1.15;margin-top:5px}
-  .status{font-size:8px;margin-top:5px;padding:4px}
-  .status:empty{display:none}
+.fields .field:nth-child(1) { grid-column: 1; grid-row: 1; }
+.fields .field:nth-child(2) { grid-column: 2; grid-row: 1; }
+.fields .field:nth-child(3) { grid-column: 3; grid-row: 1; }
+.fields .field:nth-child(4) { grid-column: 3; grid-row: 2; }
+.fields .field:nth-child(5) { grid-column: 1; grid-row: 2; }
+.fields .field:nth-child(6) { grid-column: 2; grid-row: 2; }
+.fields .field:nth-child(7) { grid-column: 4; grid-row: 2; }
+
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 6px;
+  line-height: 1.3;
+  min-height: 30px;
+}
+
+input, select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 500;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:hover, select:hover {
+  border-color: #94a3b8;
+}
+
+input:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  outline: none;
+}
+
+.results {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.indemnity-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.indemnity-row .metric {
+  padding: 16px 18px;
+}
+
+.indemnity-row .metric strong {
+  font-size: clamp(17px, 2.2vw, 22px);
+}
+
+.metric {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  min-width: 0;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.metric span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.metric strong {
+  display: block;
+  font-size: clamp(18px, 2.3vw, 22px);
+  font-weight: 800;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+  color: #1e293b;
+}
+
+.primary {
+  background: var(--primary-soft);
+  border-color: #c7d2fe;
+}
+.primary strong {
+  color: var(--primary);
+}
+
+.final {
+  background: var(--green-soft);
+  border-color: #a7f3d0;
+}
+.final strong {
+  color: var(--green);
+}
+
+.side-by-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.side-by-side .card {
+  min-width: 0;
+  margin: 0;
+}
+
+.side-by-side .section-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.side-by-side table {
+  min-width: 0;
+  font-size: 13px;
+}
+
+.section-title {
+  margin: 28px 0 12px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 490px;
+  background: #fff;
+}
+
+th, td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 800;
+  background: #f8fafc;
+}
+
+td:last-child, th:last-child {
+  text-align: right;
+}
+
+.money {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status {
+  display: none;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status.error {
+  display: block;
+  background: #fef2f2;
+  color: var(--red);
+  border: 1px solid #fecaca;
+}
+
+@media (max-width: 850px) {
+  .fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .fields .field:nth-child(1) { grid-column: 1; grid-row: 1; }
+  .fields .field:nth-child(2) { grid-column: 2; grid-row: 1; }
+  .fields .field:nth-child(3) { grid-column: 1; grid-row: 2; }
+  .fields .field:nth-child(5) { grid-column: 1; grid-row: 3; }
+  .fields .field:nth-child(6) { grid-column: 2; grid-row: 3; }
+  .fields .field:nth-child(4) { grid-column: 1; grid-row: 4; }
+  .fields .field:nth-child(7) { grid-column: 2; grid-row: 4; }
+  
+  .results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .side-by-side {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .top, main {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .fields, .results {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .field label {
+    font-size: 11px;
+    min-height: 34px;
+  }
+  .fields { gap: 10px; }
+  .indemnity-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .indemnity-row .metric { padding: 12px; }
+  .card { padding: 18px; }
+  .actions { width: 100%; }
+  .actions button { flex: 1; }
+  .metric strong { font-size: 18px; }
+}
+
+@page { size: A4 portrait; margin: 7mm; }
+
+@media print {
+  html, body {
+    width: 100%;
+    height: auto;
+    background: #fff !important;
+    color: #111;
+    font-size: 9px;
+    line-height: 1.2;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .top .actions { display: none !important; }
+  header { border-bottom: 1px solid #bbb; position: static; background: #fff !important; backdrop-filter: none; }
+  .top, main { width: 100%; max-width: none; margin: 0; padding: 0; }
+  .top { padding: 0 0 5px; gap: 5px; }
+  h1 { font-size: 16px; line-height: 1.1; }
+  h2 { font-size: 11px; line-height: 1.15; }
+  .sub { font-size: 8px; line-height: 1.15; }
+  .card { box-shadow: none; border: 1px solid #bbb; border-radius: 5px; break-inside: avoid; page-break-inside: avoid; padding: 7px; margin: 5px 0; }
+  .head { gap: 6px; margin-bottom: 6px; }
+  .num { flex-basis: 22px; height: 22px; border-radius: 4px; padding: 0; font-size: 10px; }
+  .fields { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px 6px; }
+  .fields .field:nth-child(1) { grid-column: 1; grid-row: 1; }
+  .fields .field:nth-child(2) { grid-column: 2; grid-row: 1; }
+  .fields .field:nth-child(3) { grid-column: 3; grid-row: 1; }
+  .fields .field:nth-child(5) { grid-column: 1; grid-row: 2; }
+  .fields .field:nth-child(6) { grid-column: 2; grid-row: 2; }
+  .fields .field:nth-child(4) { grid-column: 3; grid-row: 2; }
+  .fields .field:nth-child(7) { grid-column: 4; grid-row: 2; }
+  .field label { font-size: 7.5px; margin-bottom: 2px; line-height: 1.1; min-height: 18px; }
+  input, select { min-width: 0; min-height: 21px; height: 21px; padding: 2px 4px; border-radius: 4px; font-size: 8px; border-color: #bbb; }
+  .results { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 6px; }
+  .indemnity-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin-top: 5px; }
+  .metric, .indemnity-row .metric { padding: 5px 7px; border-radius: 5px; }
+  .metric span { font-size: 7.5px; line-height: 1.15; }
+  .metric strong, .indemnity-row .metric strong { font-size: 11px; line-height: 1.15; margin-top: 3px; overflow-wrap: anywhere; }
+  .side-by-side { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 5px; align-items: start; }
+  .side-by-side .card { padding: 6px; margin: 0; }
+  .side-by-side .section-title { font-size: 9px; margin: 0 0 3px; }
+  .side-by-side .table-wrap { overflow: visible; border: 1px solid #bbb; }
+  .side-by-side table { width: 100%; min-width: 0; margin-top: 3px; font-size: 7px; table-layout: fixed; }
+  .side-by-side th, .side-by-side td { padding: 3px 2px; overflow-wrap: anywhere; }
+  .section-title { font-size: 10px; margin: 7px 0 3px; }
+  .table-wrap { overflow: visible; border: 1px solid #bbb; }
+  table { width: 100%; min-width: 0; margin-top: 3px; font-size: 8px; }
+  th, td { padding: 3px 5px; border-bottom: 1px solid #ddd; }
+  th { font-size: 7px; background: #f1f1f1 !important; }
+  .money { white-space: nowrap; }
+  .note { font-size: 7px; line-height: 1.15; margin-top: 5px; }
+  .status { font-size: 8px; margin-top: 5px; padding: 4px; }
+  .status:empty { display: none; }
 }
 </style>
 </head>
 <body>
-<header><div class="top"><div><h1>Calculateur RH</h1><div class="sub">Simulation des indemnités et du solde de tout compte · MAD</div></div><div class="actions"><button class="light" id="resetBtn" type="button">Réinitialiser</button><button class="blue" id="printBtn" type="button">Imprimer / PDF</button></div></div></header>
+<header>
+  <div class="top">
+    <div>
+      <h1>EMS 100%</h1>
+      <div class="sub">Simulation des indemnités et du solde de tout compte · MAD</div>
+    </div>
+    <div class="actions">
+      <button class="light" id="resetBtn" type="button">Réinitialiser</button>
+      <button class="blue" id="printBtn" type="button">Imprimer / PDF</button>
+    </div>
+  </div>
+</header>
 <main>
 <section class="card">
- <div class="head"><div class="num">1</div><div><h2>Informations et calculs</h2></div></div>
+ <div class="head">
+   <div class="num">1</div>
+   <div><h2>Informations et calculs</h2></div>
+ </div>
  <div class="fields">
   <div class="field"><label for="base">Salaire de base mensuel (MAD)</label><input id="base" type="number" min="0" step="0.01" value="0"></div>
   <div class="field"><label for="brut">Salaire brut mensuel (MAD)</label><input id="brut" type="number" min="0" step="0.01" value="0"></div>
@@ -83,11 +516,24 @@
 <div class="side-by-side">
  <section class="card percentage-card">
   <h3 class="section-title">Pourcentages des indemnités (hors STC)</h3>
-  <div class="table-wrap"><table><thead><tr><th>Pourcentage</th><th>Total sur salaire de base</th><th>Total sur salaire brut</th></tr></thead><tbody id="percentages"></tbody></table></div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Pourcentage</th><th>Total sur salaire de base</th><th>Total sur salaire brut</th></tr>
+      </thead>
+      <tbody id="percentages"></tbody>
+    </table>
+  </div>
  </section>
  <section class="card stc-card">
-  <div class="head"><div class="num">2</div><div><h2>STC — Solde de tout compte</h2></div></div>
-  <div class="indemnity-row"><div class="metric final"><span>STC total — salaire de base</span><strong id="stcBase">—</strong></div><div class="metric final"><span>STC total — salaire brut</span><strong id="stcBrut">—</strong></div></div>
+  <div class="head">
+    <div class="num">2</div>
+    <div><h2>STC — Solde de tout compte</h2></div>
+  </div>
+  <div class="indemnity-row">
+    <div class="metric final"><span>STC total — salaire de base</span><strong id="stcBase">—</strong></div>
+    <div class="metric final"><span>STC total — salaire brut</span><strong id="stcBrut">—</strong></div>
+  </div>
  </section>
 </div>
 </main>
@@ -108,7 +554,6 @@
   let y=e.getFullYear()-s.getFullYear(), m=e.getMonth()-s.getMonth(), d=e.getDate()-s.getDate();
   if(d<0){m--;d+=new Date(e.getFullYear(),e.getMonth(),0).getDate();}
   if(m<0){y--;m+=12;}
-  // Estimation en années décimales, puis arrondi au nombre entier supérieur.
   return {y,m,d,decimal:y+(m/12)+(d/365.25)};
  }
  function preavis(poste,years){ if(poste==='MAILER') return years<5?1:2; if(poste==='TL'||poste==='MANAGER') return 3; return 0; }
@@ -129,7 +574,6 @@
   const vals=['base','brut','congeRecup','jours'].map(val);
   if(vals.some(n=>!Number.isFinite(n))){clearResults('Saisissez des valeurs numériques positives ou nulles dans les champs de salaire et de jours.');return;}
   const [b,g,congeRecup,jours]=vals;
-  // Toute fraction d'année fait passer à l'année entière suivante : 4,3 => 5 ; 8,7 => 9.
   const years=Math.ceil(s.decimal-1e-10);
   const p=preavis($('poste').value,years);
   put('anciennete',`${s.y} an(s), ${s.m} mois, ${s.d} jour(s)`);
@@ -144,8 +588,7 @@
  }
  function resetAll(){ ids.forEach(id=>{ $(id).value=defaults[id]; }); calculate(); }
  ids.forEach(id=>$(id).addEventListener('input',calculate));
- $('resetBtn').addEventListener('click',resetAll);
- $('printBtn').addEventListener('click',()=>window.print());
+ $('resetBtn').addEventListener('click',resetAll);$('printBtn').addEventListener('click',()=>window.print());
  calculate();
 })();
 </script>
