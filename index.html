@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
+  color-scheme: light;
   --bg: #f8fafc;
   --card: #ffffff;
   --ink: #0f172a;
@@ -22,7 +23,111 @@
   --radius: 16px;
 }
 
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --card: #111c2e;
+  --ink: #f1f5f9;
+  --muted: #cbd5e1;
+  --primary: #818cf8;
+  --primary-hover: #a5b4fc;
+  --primary-soft: #252b52;
+  --line: #334155;
+  --green: #34d399;
+  --green-soft: #12352e;
+  --red: #fca5a5;
+  --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.28), 0 0 1px 1px rgba(148, 163, 184, 0.12);
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] body { background: var(--bg); color: var(--ink); }
+:root[data-theme="dark"] header {
+  background: rgba(17, 28, 46, 0.94);
+  border-color: var(--line);
+}
+:root[data-theme="dark"] h1,
+:root[data-theme="dark"] h2,
+:root[data-theme="dark"] .section-title { color: var(--ink); }
+:root[data-theme="dark"] .sub,
+:root[data-theme="dark"] .field label,
+:root[data-theme="dark"] .metric span { color: var(--muted); }
+:root[data-theme="dark"] .card,
+:root[data-theme="dark"] .metric { background: var(--card); border-color: var(--line); color: var(--ink); }
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] select {
+  background: #0b1220;
+  color: #f8fafc;
+  border-color: #64748b;
+}
+:root[data-theme="dark"] input::placeholder { color: #cbd5e1; }
+:root[data-theme="dark"] .light {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #64748b;
+}
+:root[data-theme="dark"] .light:hover { background: #334155; }
+:root[data-theme="dark"] .blue {
+  background: #6366f1;
+  color: #fff;
+}
+:root[data-theme="dark"] .blue:hover { background: #818cf8; color: #0b1220; }
+:root[data-theme="dark"] .num { background: #252b52; color: #c7d2fe; }
+:root[data-theme="dark"] .primary {
+  background: #20294b;
+  border-color: #6366f1;
+}
+:root[data-theme="dark"] .primary strong { color: #c7d2fe; }
+:root[data-theme="dark"] .final {
+  background: #12352e;
+  border-color: #047857;
+}
+:root[data-theme="dark"] .final strong { color: #6ee7b7; }
+:root[data-theme="dark"] table { background: var(--card); color: var(--ink); }
+:root[data-theme="dark"] th {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: var(--line);
+}
+:root[data-theme="dark"] td { border-color: var(--line); }
+:root[data-theme="dark"] .table-wrap { border-color: var(--line); }
+:root[data-theme="dark"] .status.error {
+  background: #3b1720;
+  color: #fecaca;
+  border-color: #7f1d1d;
+}
+:root[data-theme="dark"] button:focus-visible,
+:root[data-theme="dark"] input:focus-visible,
+:root[data-theme="dark"] select:focus-visible {
+  outline-color: #a5b4fc;
+}
+
+
+/* Correctif ciblé : chiffres lisibles dans les trois indicateurs en mode sombre */
+:root[data-theme="dark"] .results .metric {
+  background: #111c2e !important;
+  border: 1px solid #64748b !important;
+}
+:root[data-theme="dark"] .results .metric span {
+  color: #e2e8f0 !important;
+  opacity: 1 !important;
+}
+:root[data-theme="dark"] .results .metric strong,
+:root[data-theme="dark"] #anciennete,
+:root[data-theme="dark"] #anneesRetenues,
+:root[data-theme="dark"] #preavis {
+  color: #ffffff !important;
+  background-color: transparent !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-shadow: none !important;
+}
+
 * { box-sizing: border-box; }
+body, header, .card, .metric, input, select, table, th, td, button {
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
 body {
   margin: 0;
   background: var(--bg);
@@ -63,7 +168,7 @@ h1 {
   font-weight: 800;
   margin: 0;
   letter-spacing: -0.02em;
-  color: #0f172a;
+  color: var(--ink);
 }
 
 h2 {
@@ -395,6 +500,8 @@ td:last-child, th:last-child {
 }
 
 @media (max-width: 480px) {
+  .actions { gap: 8px; }
+  .actions button { min-height: 42px; }
   .top, main {
     padding-left: 14px;
     padding-right: 14px;
@@ -421,6 +528,16 @@ td:last-child, th:last-child {
 @page { size: A4 portrait; margin: 7mm; }
 
 @media print {
+  :root, :root[data-theme="dark"], :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #ffffff; --card: #ffffff; --ink: #111827; --muted: #475569;
+    --primary: #4338ca; --primary-hover: #3730a3; --primary-soft: #eef2ff;
+    --line: #d1d5db; --green: #047857; --green-soft: #ecfdf5;
+    --red: #b91c1c;
+  }
+  body { color: #111827 !important; }
+  h1, h2, .section-title, .metric strong { color: #111827 !important; }
+  .field label, .metric span { color: #475569 !important; }
   html, body {
     width: 100%;
     height: auto;
@@ -482,6 +599,7 @@ td:last-child, th:last-child {
       <div class="sub">Simulation des indemnités et du solde de tout compte · MAD</div>
     </div>
     <div class="actions">
+      <button class="light" id="themeBtn" type="button" aria-pressed="false">🌙 Mode sombre</button>
       <button class="light" id="resetBtn" type="button">Réinitialiser</button>
       <button class="blue" id="printBtn" type="button">Imprimer / PDF</button>
     </div>
@@ -541,6 +659,19 @@ td:last-child, th:last-child {
 'use strict';
 (() => {
  const $ = id => document.getElementById(id);
+ const themeBtn = $('themeBtn');
+ function setTheme(theme) {
+   document.documentElement.setAttribute('data-theme', theme);
+   const dark = theme === 'dark';
+   themeBtn.textContent = dark ? '☀️ Mode clair' : '🌙 Mode sombre';
+   themeBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+   themeBtn.setAttribute('aria-label', dark ? 'Activer le mode clair' : 'Activer le mode sombre');
+ }
+ setTheme('light');
+ themeBtn.addEventListener('click', () => {
+   const current = document.documentElement.getAttribute('data-theme') || 'light';
+   setTheme(current === 'dark' ? 'light' : 'dark');
+ });
  const ids = ['base','brut','poste','debut','depart','congeRecup','jours'];
  const defaults = {base:'0',brut:'0',poste:'MAILER',debut:'',depart:'',congeRecup:'0',jours:'0'};
  const money = n => (Number.isFinite(n) ? n : 0).toLocaleString('fr-MA',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' MAD';
@@ -556,7 +687,7 @@ td:last-child, th:last-child {
   if(m<0){y--;m+=12;}
   return {y,m,d,decimal:y+(m/12)+(d/365.25)};
  }
- function preavis(poste,years){ if(poste==='MAILER') return years<5?1:2; if(poste==='TL'||poste==='MANAGER') return 3; return 0; }
+ function preavis(poste,years,ancienneteReelle){ if(poste==='MAILER') return ancienneteReelle<5?1:2; if(poste==='TL'||poste==='MANAGER') return 3; return 0; }
  function indemnityYears(y){ return 96*Math.min(y,5)+144*Math.min(Math.max(y-5,0),5)+196*Math.max(y-10,0); }
  function clearResults(message){ ['anciennete','anneesRetenues','preavis','totalBase','totalBrut','stcBase','stcBrut'].forEach(id=>put(id,'—')); $('percentages').replaceChildren(); status(message); }
  function showZeroResults(){
@@ -575,7 +706,7 @@ td:last-child, th:last-child {
   if(vals.some(n=>!Number.isFinite(n))){clearResults('Saisissez des valeurs numériques positives ou nulles dans les champs de salaire et de jours.');return;}
   const [b,g,congeRecup,jours]=vals;
   const years=Math.ceil(s.decimal-1e-10);
-  const p=preavis($('poste').value,years);
+  const p=preavis($('poste').value,years,s.decimal);
   put('anciennete',`${s.y} an(s), ${s.m} mois, ${s.d} jour(s)`);
   put('anneesRetenues',`${years} an(s)`); put('preavis',`${p} mois`);
   const domB=1.5*years*b, domG=1.5*years*g;
